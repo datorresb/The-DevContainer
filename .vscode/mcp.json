@@ -1,0 +1,27 @@
+{
+    "servers": {
+        "workiq": {
+            "url": "http://host.docker.internal:3100/mcp"
+        },
+        "backlog": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "backlog.md",
+                "mcp",
+                "start"
+            ],
+            "env": {
+                "BACKLOG_CWD": "${workspaceFolder}"
+            }
+        },
+        "ado": {
+            "type": "stdio",
+            "command": "sh",
+            "args": [
+                "-c",
+                "set -a && . ${workspaceFolder}/.env.ado && set +a && npx -y @azure-devops/mcp $ADO_ORG -d core work work-items -a envvar"
+            ]
+        }
+    }
+}

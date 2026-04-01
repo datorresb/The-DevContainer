@@ -1,0 +1,47 @@
+{
+  "name": "Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {}
+  },
+  "remoteEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/src:${containerWorkspaceFolder}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "bierner.markdown-mermaid"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": "active",
+        "debug.allowBreakpointsEverywhere": true,
+        "chat.customAgentInSubagent.enabled": true,
+        "chat.askQuestions.enabled": true,
+        "chat.tools.global.autoApprove": true,
+        "Use chat.agent.sandbox instead": false,
+        "chat.useAgentSkills": true,
+        "chat.experimental.useSkillAdherencePrompt": true,
+        "chat.useNestedAgentsMdFiles": true,
+        "github.copilot.chat.copilotMemory.enabled": true
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "initializeCommand": "touch .devcontainer/.env",
+  "runArgs": [
+    "--env-file",
+    ".devcontainer/.env"
+  ],
+  "postCreateCommand": "bash .devcontainer/postCreate.sh"
+}
