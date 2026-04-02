@@ -36,8 +36,9 @@ for file in "$AGENTS_DIR"/*.agent.md; do
   # 2. Replace infer: true with user-invocable: true
   sed -i 's/^infer: true$/user-invocable: true/' "$file"
 
-  # 3. Replace ce: namespace with ce- in body content (not in frontmatter)
-  sed -i 's/\bce:\([a-z*][a-z0-9_*-]*\)/ce-\1/g' "$file"
+  # 3. Replace ce: namespace with ce- in body content (not in URLs or non-command contexts)
+  # Only match ce: after start-of-line, whitespace, or common delimiters (not /)
+  sed -i 's/\(^\|[[:space:],(.)"`'"'"']\)ce:\([a-z*][a-z0-9_*-]*\)/\1ce-\2/g' "$file"
 
   count=$((count + 1))
 done
