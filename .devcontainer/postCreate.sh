@@ -23,4 +23,8 @@ else
   echo "Skipping Azure CLI (set INSTALL_AZURE_CLI=true to enable)"
 fi
 
+# Install Bun
+echo "Installing Bun..."
+curl -fsSL https://bun.com/install | bash
+
 echo "postCreate done"

@@ -27,7 +27,11 @@
         "chat.useAgentSkills": true,
         "chat.experimental.useSkillAdherencePrompt": true,
         "chat.useNestedAgentsMdFiles": true,
-        "github.copilot.chat.copilotMemory.enabled": true
+        "github.copilot.chat.copilotMemory.enabled": true,
+        "chat.agent.maxRequests": 10000000,
+        "chat.subagents.allowInvocationsFromSubagents": true,
+        "chat.useCustomAgentHooks": true,
+        "chat.autopilot.enabled": true
       }
     }
   },
