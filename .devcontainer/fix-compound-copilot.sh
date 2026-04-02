@@ -38,7 +38,8 @@ for file in "$AGENTS_DIR"/*.agent.md; do
 
   # 3. Replace ce: namespace with ce- in body content (not in URLs or non-command contexts)
   # Only match ce: after start-of-line, whitespace, or common delimiters (not /)
-  sed -i 's/\(^\|[[:space:],(.)"`'"'"']\)ce:\([a-z*][a-z0-9_*-]*\)/\1ce-\2/g' "$file"
+  # Handles multi-colon refs: ce:work:beta → ce-work-beta
+  perl -i -pe 's/(?<=^|[\s,.()`'"'"'"])ce:([a-z*][a-z0-9_*:-]*)/"ce-" . ($1 =~ s{:}{-}gr)/geim' "$file"
 
   count=$((count + 1))
 done
