@@ -13,35 +13,52 @@ set -euo pipefail
 # Fixes:
 #   1. Remove `tools: ["*"]` (not valid for Copilot agents)
 #   2. Replace `infer: true` with `user-invocable: true`
-#   3. Replace `ce:` namespace references with `ce-` in body text
+#   3. Replace `ce:` namespace references with `ce-` in all content
 #
 
-AGENTS_DIR="${1:-.github/agents}"
+GITHUB_DIR="${1:-.github}"
 
-if [ ! -d "$AGENTS_DIR" ]; then
-  echo "Error: agents directory '$AGENTS_DIR' not found."
-  echo "Usage: bash .devcontainer/fix-compound-copilot.sh [agents-dir]"
+if [ ! -d "$GITHUB_DIR" ]; then
+  echo "Error: directory '$GITHUB_DIR' not found."
+  echo "Usage: bash .devcontainer/fix-compound-copilot.sh [.github-dir]"
   exit 1
 fi
 
-count=0
-for file in "$AGENTS_DIR"/*.agent.md; do
-  [ -f "$file" ] || continue
-
-  # 1. Remove tools: ["*"] or tools:\n  - "*" block
-  sed -i '/^tools:$/,/^[^ -]/{ /^tools:$/d; /^  - /d; }' "$file"
-  sed -i "/^tools: \['\*'\]$/d" "$file"
-  sed -i '/^tools: \["\*"\]$/d' "$file"
-
-  # 2. Replace infer: true with user-invocable: true
-  sed -i 's/^infer: true$/user-invocable: true/' "$file"
-
-  # 3. Replace ce: namespace with ce- in body content (not in URLs or non-command contexts)
-  # Only match ce: after start-of-line, whitespace, or common delimiters (not /)
+fix_ce_colons() {
+  # Replace ce: namespace with ce- (not in URLs or non-command contexts)
   # Handles multi-colon refs: ce:work:beta → ce-work-beta
-  perl -i -pe 's/(?<=^|[\s,.()`'"'"'"])ce:([a-z*][a-z0-9_*:-]*)/"ce-" . ($1 =~ s{:}{-}gr)/geim' "$file"
+  perl -i -pe 's/(?<=^|[\s,.()`'"'"'"])ce:([a-z*][a-z0-9_*:-]*)/"ce-" . ($1 =~ s{:}{-}gr)/geim' "$1"
+}
 
-  count=$((count + 1))
-done
+# Fix agent files
+agent_count=0
+if [ -d "$GITHUB_DIR/agents" ]; then
+  for file in "$GITHUB_DIR/agents"/*.agent.md; do
+    [ -f "$file" ] || continue
 
-echo "Fixed $count agent files in $AGENTS_DIR"
+    # 1. Remove tools: ["*"] or tools:\n  - "*" block
+    sed -i '/^tools:$/,/^[^ -]/{ /^tools:$/d; /^  - /d; }' "$file"
+    sed -i "/^tools: \['\*'\]$/d" "$file"
+    sed -i '/^tools: \["\*"\]$/d' "$file"
+
+    # 2. Replace infer: true with user-invocable: true
+    sed -i 's/^infer: true$/user-invocable: true/' "$file"
+
+    # 3. Replace ce: namespace references
+    fix_ce_colons "$file"
+
+    agent_count=$((agent_count + 1))
+  done
+fi
+
+# Fix skill files
+skill_count=0
+if [ -d "$GITHUB_DIR/skills" ]; then
+  while IFS= read -r -d '' file; do
+    # Skills only need the ce: fix (no tools/infer in SKILL.md frontmatter)
+    fix_ce_colons "$file"
+    skill_count=$((skill_count + 1))
+  done < <(find "$GITHUB_DIR/skills" -name "SKILL.md" -print0)
+fi
+
+echo "Fixed $agent_count agent files and $skill_count skill files in $GITHUB_DIR"
